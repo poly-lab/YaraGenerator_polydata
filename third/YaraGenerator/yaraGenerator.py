@@ -183,7 +183,7 @@ def findCommonStrings(fileDict, filetype):
   return finalStringList
 
 #Build the actual rule
-def buildYara(options, strings, hashes):
+def buildYara(InputDirectory,RulesName,Author,Description,Tags,Verbose,FileType, strings, hashes):
   date = datetime.now().strftime("%Y-%m-%d")
   randStrings = []
   #Ensure we have shared attributes and select twenty
@@ -195,7 +195,7 @@ def buildYara(options, strings, hashes):
     sys.exit(1)
 
   #Prioritize based on specific filetype
-  if options.FileType == 'email':
+  if FileType == 'email':
     for string in strings:
       if "@" in string:
         randStrings.append(string)
@@ -205,19 +205,19 @@ def buildYara(options, strings, hashes):
   #Remove Duplicates
   randStrings = list(set(randStrings))
 
-  ruleOutFile = open(options.RuleName + ".yar", "w")
-  ruleOutFile.write("rule "+options.RuleName)
-  if options.Tags:
-    ruleOutFile.write(" : " + options.Tags)
+  ruleOutFile = open(RuleName + ".yar", "w")
+  ruleOutFile.write("rule "+RuleName)
+  if Tags:
+    ruleOutFile.write(" : " + Tags)
   ruleOutFile.write("\n")
   ruleOutFile.write("{\n")
   ruleOutFile.write("meta:\n")
-  ruleOutFile.write("\tauthor = \""+ options.Author + "\"\n")
+  ruleOutFile.write("\tauthor = \""+ Author + "\"\n")
   ruleOutFile.write("\tdate = \""+ date +"\"\n")
-  ruleOutFile.write("\tdescription = \""+ options.Description + "\"\n")
+  ruleOutFile.write("\tdescription = \""+ Description + "\"\n")
   for h in hashes:
   	ruleOutFile.write("\thash"+str(hashes.index(h))+" = \""+ h + "\"\n")
-  ruleOutFile.write("\tsample_filetype = \""+ options.FileType + "\"\n")
+  ruleOutFile.write("\tsample_filetype = \""+ FileType + "\"\n")
   ruleOutFile.write("\tyaragenerator = \"https://github.com/Xen0ph0n/YaraGenerator\"\n")
   ruleOutFile.write("strings:\n")
   for s in randStrings:
@@ -226,7 +226,7 @@ def buildYara(options, strings, hashes):
     else:  
       ruleOutFile.write("\t$string"+str(randStrings.index(s))+" = \""+ s.replace("\\","\\\\") +"\"\n")
   ruleOutFile.write("condition:\n")
-  if options.FileType == 'email':
+  if FileType == 'email':
     ruleOutFile.write("\t any of them\n")
   else:
     ruleOutFile.write("\t"+str(len(randStrings) - 1)+" of them\n")
@@ -273,58 +273,44 @@ def jshtmlFile(fileDict):
   return finalStringList
 
 #Main
-def main():
+def yaramain(InputDirectory,RulesName,Author,Description,Tags,Verbose,FileType):
   filetypeoptions = ['unknown','exe','pdf','email','office','js-html']
-  opt = argparse.ArgumentParser(description="YaraGenerator")
-  opt.add_argument("InputDirectory", help="Path To Files To Create Yara Rule From")
-  opt.add_argument("-r", "--RuleName", required=True , help="Enter A Rule/Alert Name (No Spaces + Must Start with Letter)")
-  opt.add_argument("-a", "--Author", default="Anonymous", help="Enter Author Name")
-  opt.add_argument("-d", "--Description",default="No Description Provided",help="Provide a useful description of the Yara Rule")
-  opt.add_argument("-t", "--Tags",default="",help="Apply Tags to Yara Rule For Easy Reference (AlphaNumeric)")
-  opt.add_argument("-v", "--Verbose",default=False,action="store_true", help= "Print Finished Rule To Standard Out")
-  opt.add_argument("-f", "--FileType", required=True, default='unknown',choices=filetypeoptions, help= "Select Sample Set FileType choices are: "+', '.join(filetypeoptions), metavar="")
-  if len(sys.argv)<=3:
-    opt.print_help()
-    sys.exit(1)
-  options = opt.parse_args()
-  if " " in options.RuleName or not options.RuleName[0].isalpha():
+  if " " in RuleName or not RuleName[0].isalpha():
   	print "[!] Rule Name Can Not Contain Spaces or Begin With A Non Alpha Character"
 
 
   #Get Filenames and hashes
-  fileDict = getFiles(options.InputDirectory)
-  print "\n[+] Generating Yara Rule " + options.RuleName + " from files located in: " + options.InputDirectory
+  fileDict = getFiles(InputDirectory)
+  print "\n[+] Generating Yara Rule " + RuleName + " from files located in: " + InputDirectory
   
   #Begin per-filetype processing paths
-  if options.FileType == 'exe':
+  if FileType == 'exe':
     finalStringList = exeFile(fileDict)
-  elif options.FileType == 'pdf':
+  elif FileType == 'pdf':
     finalStringList = pdfFile(fileDict)
-  elif options.FileType == 'email':
+  elif FileType == 'email':
     finalStringList = emailFile(fileDict)
-  elif options.FileType == 'office':
+  elif FileType == 'office':
     finalStringList = officeFile(fileDict)
-  elif options.FileType == 'js-html':
+  elif FileType == 'js-html':
     finalStringList = jshtmlFile(fileDict)
   else:
     finalStringList = unknownFile(fileDict)
 
   #Build and Write Yara Rule
   global hashList
-  buildYara(options, finalStringList, hashList)
-  print "\n[+] Yara Rule Generated: "+options.RuleName+".yar\n"
+  buildYara(InputDirectory,RulesName,Author,Description,Tags,Verbose,FileType, finalStringList, hashList)
+  print "\n[+] Yara Rule Generated: "+RuleName+".yar\n"
   print "  [+] Files Examined: " + str(hashList)
-  print "  [+] Author Credited: " + options.Author
-  print "  [+] Rule Description: " + options.Description 
-  if options.Tags:
-    print "  [+] Rule Tags: " + options.Tags +"\n"
-  if options.Verbose:
+  print "  [+] Author Credited: " + Author
+  print "  [+] Rule Description: " + Description 
+  if Tags:
+    print "  [+] Rule Tags: " + Tags +"\n"
+  if Verbose:
     print "[+] Rule Below:\n"
-    with open(options.RuleName + ".yar", 'r') as donerule:
+    with open(RuleName + ".yar", 'r') as donerule:
       print donerule.read()
 
   print "[+] YaraGenerator (C) 2013 Chris@xenosec.org https://github.com/Xen0ph0n/YaraGenerator"
 
 
-if __name__ == "__main__":	
-	main()
