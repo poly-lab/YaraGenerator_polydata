@@ -10,7 +10,7 @@ config.read(os.path.join(YARA_ROOT,"conf","conf.conf"))
 input_path=config.get("input", "file_path")
 output_path=config.get("output", "rule_path")
 author=config.get("auther", "auther")
-    
+#获取种类地址
 def get_path(input_path):
     new_path=[]
     for root,dirs,files in os.walk(input_path):
@@ -20,7 +20,7 @@ def get_path(input_path):
     new_path=list(set(new_path))
     return new_path
     
-    
+#定义文件类型   
 def typeList():    
     return {  
         "FFD8FF": "jpg",  
@@ -92,7 +92,7 @@ if __name__=="__main__":
     new_path=get_path(input_path)
     for path in new_path:
         RulesName=path.split('/')
-        RulesName=RulesName[-4]+RulesName[-3]+RulesName[-2]+RulesName[-1]
+        RulesName=RulesName[-4]+'_'+RulesName[-3]+'_'+RulesName[-2]+'_'+RulesName[-1]
         RulesName=RulesName.replace('-','')
         
         for root,li,files in os.walk(path):
@@ -112,5 +112,6 @@ if __name__=="__main__":
         Tags='APT'
         Verbose='OK'
         RulesName=os.path.join(output_path,RulesName)
+        #调用yaraGenerator生成rules
         yaramain(InputDirectory, RulesName, Author, Description, Tags, Verbose, FileType)
     

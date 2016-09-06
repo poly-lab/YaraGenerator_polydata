@@ -51,7 +51,7 @@ def exeImportsFuncs(filename, allstrings):
           return list(set(allstrings))
         else:
           print '[!] No Extractable Attributes Present in Hash: '+str(md5sum(filename)) + ' Please Remove it from the Sample Set and Try Again!'
-          sys.exit(1) 
+          pass
     except:  
         return allstrings
 
@@ -192,7 +192,7 @@ def buildYara(InputDirectory,RuleName,Author,Description,Tags,Verbose,FileType, 
 	  randStrings.append(random.choice(strings))
   except IndexError:
     print '[!] No Common Attributes Found For All Samples, Please Be More Selective'
-    sys.exit(1)
+    pass
 
   #Prioritize based on specific filetype
   if FileType == 'email':
