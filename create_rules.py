@@ -98,16 +98,20 @@ if __name__=="__main__":
         for root,li,files in os.walk(path):
             file_path=root+'/'+files[0]
             ftype=get_filetype(file_path)
-        if ftype=='exe':
+        if 'Word'  in path:
+            FileType='office'  
+        elif  'Excel' in path:
+            FileType='office'         
+        elif 'exe'==ftype:
             FileType='exe'
-        elif ftype=='pdf':   
+        elif 'pdf'==ftype:   
             FileType='pdf'
-        elif ftype=='email':
+        elif 'email'==ftype:
             FileType='email'
         else:
             FileType='unkown'
-        if 'Word' or 'Excel' in path:
-            FileType='office'
+        
+        
         InputDirectory=path+'/'
         Tags='APT'
         Verbose='OK'
