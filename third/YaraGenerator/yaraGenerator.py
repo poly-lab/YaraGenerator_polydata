@@ -6,9 +6,9 @@
 
 import re, sys, os, argparse, hashlib, random, email
 from datetime import datetime
-
+from lib.common.constants import YARA_ROOT
 #Ensure Import path is in syspath
-pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
+pathname = os.path.join(YARA_ROOT,"third","YaraGenerator")
 sys.path.append(pathname + '/modules')
 
 
@@ -183,7 +183,7 @@ def findCommonStrings(fileDict, filetype):
   return finalStringList
 
 #Build the actual rule
-def buildYara(InputDirectory,RulesName,Author,Description,Tags,Verbose,FileType, strings, hashes):
+def buildYara(InputDirectory,RuleName,Author,Description,Tags,Verbose,FileType, strings, hashes):
   date = datetime.now().strftime("%Y-%m-%d")
   randStrings = []
   #Ensure we have shared attributes and select twenty
@@ -273,7 +273,7 @@ def jshtmlFile(fileDict):
   return finalStringList
 
 #Main
-def yaramain(InputDirectory,RulesName,Author,Description,Tags,Verbose,FileType):
+def yaramain(InputDirectory,RuleName,Author,Description,Tags,Verbose,FileType):
   filetypeoptions = ['unknown','exe','pdf','email','office','js-html']
   if " " in RuleName or not RuleName[0].isalpha():
   	print "[!] Rule Name Can Not Contain Spaces or Begin With A Non Alpha Character"
@@ -299,7 +299,7 @@ def yaramain(InputDirectory,RulesName,Author,Description,Tags,Verbose,FileType):
 
   #Build and Write Yara Rule
   global hashList
-  buildYara(InputDirectory,RulesName,Author,Description,Tags,Verbose,FileType, finalStringList, hashList)
+  buildYara(InputDirectory,RuleName,Author,Description,Tags,Verbose,FileType, finalStringList, hashList)
   print "\n[+] Yara Rule Generated: "+RuleName+".yar\n"
   print "  [+] Files Examined: " + str(hashList)
   print "  [+] Author Credited: " + Author
