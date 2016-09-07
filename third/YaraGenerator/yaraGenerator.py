@@ -104,7 +104,7 @@ def emailParse(filename):
       return emaillist 
     except Exception:
         print '[!] This File is not an EML File: '+str(md5sum(filename)) + ' Please Remove it from the Sample Set or Select Proper FileType!'
-        sys.exit(1) 
+        pass 
 
 def linkSearch(attachment):
                 urls = list(set(re.compile('(?:ftp|hxxp)[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', re.I).findall(attachment)))
@@ -132,10 +132,10 @@ def getStrings(filename):
         return list(set(allstrings))
     else:
       print '[!] No Extractable Attributes Present in Hash: '+str(md5sum(filename)) + ' Please Remove it from the Sample Set and Try Again!'
-      sys.exit(1) 
+      pass 
   except Exception:
     print '[!] No Extractable Attributes Present in Hash: '+str(md5sum(filename)) + ' Please Remove it from the Sample Set and Try Again!'
-    sys.exit(1)
+    pass
 
 def md5sum(filename):
   fh = open(filename, 'rb')
