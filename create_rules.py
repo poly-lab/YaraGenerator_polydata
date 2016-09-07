@@ -3,7 +3,7 @@ import os
 import ConfigParser,struct
 from lib.common.constants import YARA_ROOT
 from third.YaraGenerator.yaraGenerator import yaramain
-
+from multiprocessing import Pool
 
 config=ConfigParser.ConfigParser()
 config.read(os.path.join(YARA_ROOT,"conf","conf.conf"))
@@ -84,38 +84,41 @@ def get_filetype(filename):
     binfile.close()    
     return ftype            
 
+def create_rules(path):
+    RulesName=path.split('/')
+    RulesName=RulesName[-4]+'_'+RulesName[-3]+'_'+RulesName[-2]+'_'+RulesName[-1]
+    RulesName=RulesName.replace('-','')
+            
+    for root,li,files in os.walk(path):
+        file_path=root+'/'+files[0]
+        ftype=get_filetype(file_path)
+    if 'Word'  in path:
+        FileType='office'  
+    elif  'Excel' in path:
+        FileType='office'         
+    elif 'exe'==ftype:
+        FileType='exe'
+    elif 'pdf'==ftype:   
+        FileType='pdf'
+    elif 'email'==ftype:
+        FileType='email'
+    else:
+        FileType='unkown'
     
+    
+    InputDirectory=path+'/'
+    Tags='APT'
+    Verbose='OK'
+    RulesName=os.path.join(output_path,RulesName)
+    #调用yaraGenerator生成rules
+    yaramain(InputDirectory, RulesName, Author, Description, Tags, Verbose, FileType)    
 
 if __name__=="__main__":
     Author=author
     Description='test'
     new_path=get_path(input_path)
-    for path in new_path:
-        RulesName=path.split('/')
-        RulesName=RulesName[-4]+'_'+RulesName[-3]+'_'+RulesName[-2]+'_'+RulesName[-1]
-        RulesName=RulesName.replace('-','')
-        
-        for root,li,files in os.walk(path):
-            file_path=root+'/'+files[0]
-            ftype=get_filetype(file_path)
-        if 'Word'  in path:
-            FileType='office'  
-        elif  'Excel' in path:
-            FileType='office'         
-        elif 'exe'==ftype:
-            FileType='exe'
-        elif 'pdf'==ftype:   
-            FileType='pdf'
-        elif 'email'==ftype:
-            FileType='email'
-        else:
-            FileType='unkown'
-        
-        
-        InputDirectory=path+'/'
-        Tags='APT'
-        Verbose='OK'
-        RulesName=os.path.join(output_path,RulesName)
-        #调用yaraGenerator生成rules
-        yaramain(InputDirectory, RulesName, Author, Description, Tags, Verbose, FileType)
+    pool = Pool(processes=20)
+    pool.map(create_rules,new_path)
+    pool.join()
+    pool.close()
     
