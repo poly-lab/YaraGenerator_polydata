@@ -117,7 +117,7 @@ if __name__=="__main__":
     Author=author
     Description='test'
     new_path=get_path(input_path)
-    pool = Pool(processes=20)
+    pool = Pool(processes=50)
     pool.map(create_rules,new_path)
     pool.join()
     pool.close()
